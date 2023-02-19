@@ -1,0 +1,99 @@
+version: "3.7"
+
+services:
+        
+  sim:
+    container_name: sim
+    image: ${REGISTRY:-camunda-demo}/sim:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: clients/sim/Dockerfile
+    ports:
+      - "6001:80"     # app
+      - "6601:3500"   # dapr
+    networks:
+      - camunda-demo
+  
+  sim-dapr:
+    container_name: sim-dapr
+    image: daprio/daprd:1.10.0
+    network_mode: "service:sim"
+    command: ["./daprd",
+              "-app-id", "sim",
+              "-app-port", "80",
+              "-placement-host-address", "dapr-placement:50000",
+              "-components-path", "/components",
+              "-config", "/configuration/zipkin.yaml"
+    ]
+    volumes:
+      - "./dapr/components/:/components"
+      - "./dapr/configuration/:/configuration"
+    depends_on:
+      - sim
+    
+  muw:
+    container_name: muw
+    image: ${REGISTRY:-camunda-demo}/muw:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: services/muw/Dockerfile
+    ports:
+      - "6002:80"     # app
+      - "6602:3500"   # dapr
+    networks:
+      - camunda-demo
+  
+  muw-dapr:
+    container_name: muw-dapr
+    image: daprio/daprd:1.10.0
+    network_mode: "service:muw"
+    command: ["./daprd",
+              "-app-id", "muw",
+              "-app-port", "80",
+              "-placement-host-address", "dapr-placement:50000",
+              "-components-path", "/components",
+              "-config", "/configuration/zipkin.yaml"
+    ]
+    volumes:
+      - "./dapr/components/:/components"
+      - "./dapr/configuration/:/configuration"
+    depends_on:
+      - muw
+      
+  cms:
+    container_name: cms
+    image: ${REGISTRY:-camunda-demo}/cms:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: services/cms/Dockerfile
+    ports:
+      - "6003:80"     # app
+      - "6603:3500"   # dapr
+    networks:
+      - camunda-demo
+
+  cms-dapr:
+    container_name: cms-dapr
+    image: daprio/daprd:1.10.0
+    network_mode: "service:cms"
+    command: [ "./daprd",
+               "-app-id", "cms",
+               "-app-port", "80",
+               "-placement-host-address", "dapr-placement:50000",
+               "-components-path", "/components",
+               "-config", "/configuration/zipkin.yaml"
+    ]
+    volumes:
+      - "./dapr/components/:/components"
+      - "./dapr/configuration/:/configuration"
+    depends_on:
+      - cms
+  
+  dapr-placement:
+    image: daprio/dapr:1.10.0
+    command: [ "./placement", "-port", "50000", "-log-level", "debug" ]
+    ports:
+      - "50000:50000"
+  
+networks:
+  camunda-demo:

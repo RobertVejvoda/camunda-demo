@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_01segz5" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.8.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.2.0">
+  <bpmn:process id="subscription-validation" name="Subscription validation process" isExecutable="true">
+    <bpmn:endEvent id="Event_1w2f5cn" name="Subscription Accepted">
+      <bpmn:incoming>Flow_1pix7m1</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:manualTask id="Activity_0btn8vu" name="Manual Subscription Check">
+      <bpmn:extensionElements>
+        <zeebe:properties>
+          <zeebe:property name="Reject Reason" value="=rejectReason" />
+        </zeebe:properties>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0dhik2b</bpmn:incoming>
+      <bpmn:outgoing>Flow_0y79hwa</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:exclusiveGateway id="Gateway_139dkor">
+      <bpmn:incoming>Flow_1t59ue5</bpmn:incoming>
+      <bpmn:outgoing>Flow_1gzgl7c</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0pf85m2</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1gzgl7c" sourceRef="Gateway_139dkor" targetRef="Activity_0dy1y6r">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=subcription.isEligible=false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="Gateway_0qc5hu5" name="Accept / Reject">
+      <bpmn:incoming>Flow_0y79hwa</bpmn:incoming>
+      <bpmn:outgoing>Flow_0rxsg0i</bpmn:outgoing>
+      <bpmn:outgoing>Flow_04sdxeq</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0y79hwa" sourceRef="Activity_0btn8vu" targetRef="Gateway_0qc5hu5" />
+    <bpmn:sequenceFlow id="Flow_0rxsg0i" sourceRef="Gateway_0qc5hu5" targetRef="Activity_0pdkvds">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=subscription.isAcceptable</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0pf85m2" sourceRef="Gateway_139dkor" targetRef="Activity_0pdkvds">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=subscription.isEligible</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1pix7m1" sourceRef="Activity_0pdkvds" targetRef="Event_1w2f5cn" />
+    <bpmn:serviceTask id="Activity_0pdkvds" name="Accepted">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="accepted" />
+        <zeebe:ioMapping>
+          <zeebe:output source="=isAccepted" target="isAccepted" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0rxsg0i</bpmn:incoming>
+      <bpmn:incoming>Flow_0pf85m2</bpmn:incoming>
+      <bpmn:outgoing>Flow_1pix7m1</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_04sdxeq" sourceRef="Gateway_0qc5hu5" targetRef="Activity_11ulnqi">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=subscription.isAcceptable=false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_0sp6hrx" name="Subscription Rejected">
+      <bpmn:incoming>Flow_0fnnz8k</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0fnnz8k" sourceRef="Activity_11ulnqi" targetRef="Event_0sp6hrx" />
+    <bpmn:serviceTask id="Activity_11ulnqi" name="Rejected with reason">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="rejected" />
+        <zeebe:ioMapping>
+          <zeebe:output source="=isRejected" target="isRejected" />
+          <zeebe:output source="=rejectReason" target="rejectReason" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_04sdxeq</bpmn:incoming>
+      <bpmn:outgoing>Flow_0fnnz8k</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="Event_0pdkwae" name="Subscription Validated">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="=portfolioValue" target="portfolioValue" />
+          <zeebe:output source="=claimsValue" target="claimsValue" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_066msm2</bpmn:incoming>
+      <bpmn:outgoing>Flow_1i1vv0l</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_00af9pa" messageRef="Message_2sohmj4" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_1t59ue5" sourceRef="Activity_0yeicqa" targetRef="Gateway_139dkor" />
+    <bpmn:businessRuleTask id="Activity_0yeicqa" name="Decide whether subscription is eligible for fast-track">
+      <bpmn:extensionElements>
+        <zeebe:calledDecision decisionId="subscriptionDecision" resultVariable="isEligible" />
+        <zeebe:ioMapping>
+          <zeebe:output source="=isEligible" target="isEligible" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1i1vv0l</bpmn:incoming>
+      <bpmn:outgoing>Flow_1t59ue5</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:sequenceFlow id="Flow_0dhik2b" sourceRef="Activity_0dy1y6r" targetRef="Activity_0btn8vu" />
+    <bpmn:serviceTask id="Activity_0dy1y6r" name="Notify assessor">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="notify-assessor" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1gzgl7c</bpmn:incoming>
+      <bpmn:outgoing>Flow_0dhik2b</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_1hdo8ff" name="Register Subscription">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="register" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_16wxn0h</bpmn:incoming>
+      <bpmn:outgoing>Flow_1kl7v49</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1kl7v49" sourceRef="Activity_1hdo8ff" targetRef="Activity_1enpjta" />
+    <bpmn:sequenceFlow id="Flow_066msm2" sourceRef="Activity_1enpjta" targetRef="Event_0pdkwae" />
+    <bpmn:sendTask id="Activity_1enpjta" name="Validate Subscription">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="validate" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1kl7v49</bpmn:incoming>
+      <bpmn:outgoing>Flow_066msm2</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sequenceFlow id="Flow_1i1vv0l" sourceRef="Event_0pdkwae" targetRef="Activity_0yeicqa" />
+    <bpmn:startEvent id="Event_0mt3kmc" name="Subscription validation requested">
+      <bpmn:outgoing>Flow_16wxn0h</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_08iy4f2" messageRef="Message_05c6p0m" />
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_16wxn0h" sourceRef="Event_0mt3kmc" targetRef="Activity_1hdo8ff" />
+  </bpmn:process>
+  <bpmn:message id="Message_2aflkpo" name="claims-checked">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=subscription.subscriptionId" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_2sohmj4" name="validated">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=subscriptionId" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_05c6p0m" name="validation-requested" />
+  <bpmn:message id="Message_3gi38kv" name="cancellation-requested">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=subscription.subscriptionId" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="subscription-validation">
+      <bpmndi:BPMNShape id="Event_1w2f5cn_di" bpmnElement="Event_1w2f5cn">
+        <dc:Bounds x="1402" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1393" y="145" width="61" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ub3glj_di" bpmnElement="Activity_0btn8vu">
+        <dc:Bounds x="900" y="390" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_139dkor_di" bpmnElement="Gateway_139dkor" isMarkerVisible="true">
+        <dc:Bounds x="925" y="95" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0qc5hu5_di" bpmnElement="Gateway_0qc5hu5" isMarkerVisible="true">
+        <dc:Bounds x="1105" y="255" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1043" y="243" width="74" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0e1o5xm_di" bpmnElement="Activity_0pdkvds">
+        <dc:Bounds x="1080" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0sp6hrx_di" bpmnElement="Event_0sp6hrx">
+        <dc:Bounds x="1402" y="262" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1393" y="305" width="61" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_16zojjj_di" bpmnElement="Activity_11ulnqi">
+        <dc:Bounds x="1230" y="240" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1v562r5_di" bpmnElement="Event_0pdkwae">
+        <dc:Bounds x="662" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="652" y="145" width="61" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0csa5rm_di" bpmnElement="Activity_0yeicqa">
+        <dc:Bounds x="770" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_15urgfe_di" bpmnElement="Activity_0dy1y6r">
+        <dc:Bounds x="900" y="240" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1uhfsy6_di" bpmnElement="Event_0mt3kmc">
+        <dc:Bounds x="182" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="171" y="145" width="61" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0secx2a_di" bpmnElement="Activity_1hdo8ff">
+        <dc:Bounds x="300" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1xkhbjp_di" bpmnElement="Activity_1enpjta">
+        <dc:Bounds x="490" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1gzgl7c_di" bpmnElement="Flow_1gzgl7c">
+        <di:waypoint x="950" y="145" />
+        <di:waypoint x="950" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0y79hwa_di" bpmnElement="Flow_0y79hwa">
+        <di:waypoint x="1000" y="430" />
+        <di:waypoint x="1130" y="430" />
+        <di:waypoint x="1130" y="305" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0rxsg0i_di" bpmnElement="Flow_0rxsg0i">
+        <di:waypoint x="1130" y="255" />
+        <di:waypoint x="1130" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0pf85m2_di" bpmnElement="Flow_0pf85m2">
+        <di:waypoint x="975" y="120" />
+        <di:waypoint x="1080" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1pix7m1_di" bpmnElement="Flow_1pix7m1">
+        <di:waypoint x="1180" y="120" />
+        <di:waypoint x="1402" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04sdxeq_di" bpmnElement="Flow_04sdxeq">
+        <di:waypoint x="1155" y="280" />
+        <di:waypoint x="1230" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0fnnz8k_di" bpmnElement="Flow_0fnnz8k">
+        <di:waypoint x="1330" y="280" />
+        <di:waypoint x="1402" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1t59ue5_di" bpmnElement="Flow_1t59ue5">
+        <di:waypoint x="870" y="120" />
+        <di:waypoint x="925" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0dhik2b_di" bpmnElement="Flow_0dhik2b">
+        <di:waypoint x="950" y="320" />
+        <di:waypoint x="950" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kl7v49_di" bpmnElement="Flow_1kl7v49">
+        <di:waypoint x="400" y="120" />
+        <di:waypoint x="490" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_066msm2_di" bpmnElement="Flow_066msm2">
+        <di:waypoint x="590" y="120" />
+        <di:waypoint x="662" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1i1vv0l_di" bpmnElement="Flow_1i1vv0l">
+        <di:waypoint x="698" y="120" />
+        <di:waypoint x="770" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16wxn0h_di" bpmnElement="Flow_16wxn0h">
+        <di:waypoint x="218" y="120" />
+        <di:waypoint x="300" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

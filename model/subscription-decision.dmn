@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" id="Definitions_1crpuqq" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.8.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.2.0">
+  <decision id="subscriptionDecision" name="Subscription decision">
+    <informationRequirement id="InformationRequirement_0lynayl">
+      <requiredInput href="#InputData_0ajz9xm" />
+    </informationRequirement>
+    <informationRequirement id="InformationRequirement_1niwzjb">
+      <requiredDecision href="#Decision_1xoblgv" />
+    </informationRequirement>
+    <decisionTable id="DecisionTable_18amfh2" hitPolicy="FIRST">
+      <input id="Input_1" label="PMS &#38; CMS Eligible">
+        <inputExpression id="InputExpression_1" typeRef="boolean">
+          <text>isFastTrackEligible</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0z8zqdl" label="Age" biodi:width="192">
+        <inputExpression id="LiteralExpression_11rzo3f" typeRef="number">
+          <text>age</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="Is Eligible" name="isEligible" typeRef="boolean" />
+      <rule id="DecisionRule_12qts01">
+        <description>not acceptable if older than 60 years</description>
+        <inputEntry id="UnaryTests_0jzkx86">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0t524al">
+          <text>&gt; 60</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1vpgt66">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0fll8r8">
+        <description>not acceptable if younger than 18 years</description>
+        <inputEntry id="UnaryTests_0rajk08">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1dbrkax">
+          <text>&lt; 18</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1c80hrp">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_06fitio">
+        <description>not acceptable if already not acceptable from policy or claims decision</description>
+        <inputEntry id="UnaryTests_1t8c7hg">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13l0tyn">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0alfggz">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0trp02e">
+        <description>acceptable in all other cases</description>
+        <inputEntry id="UnaryTests_1ifd3ix">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0caeuhg">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1wn13wq">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <decision id="Decision_1xoblgv" name="Existing client portfolio decision">
+    <informationRequirement id="InformationRequirement_14i51qu">
+      <requiredInput href="#InputData_0yshxip" />
+    </informationRequirement>
+    <informationRequirement id="InformationRequirement_16nm1zn">
+      <requiredInput href="#InputData_1hge8xj" />
+    </informationRequirement>
+    <decisionTable id="DecisionTable_0j90jdl" hitPolicy="FIRST">
+      <input id="InputClause_1u7mxc3" label="Policy Cover" biodi:width="192">
+        <inputExpression id="LiteralExpression_1cispnc" typeRef="number">
+          <text>portfolioValue</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_04fsuf9" label="Claims Amount">
+        <inputExpression id="LiteralExpression_1fhsaq4" typeRef="number">
+          <text>claimsValue</text>
+        </inputExpression>
+      </input>
+      <output id="OutputClause_1qn3wjv" label="Fast-track eligible" name="isFastTrackEligible" typeRef="boolean" biodi:width="192" />
+      <rule id="DecisionRule_16g2bqu">
+        <inputEntry id="UnaryTests_14fzzj7">
+          <text>&gt; 0</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1aytela">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1rd2lc9">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0g7zfwc">
+        <inputEntry id="UnaryTests_1lu64ve">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01oj0vh">
+          <text>&gt; 0</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_05sgv6y">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_007ypcm">
+        <inputEntry id="UnaryTests_0nro2vw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0kz0u0x">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_19vm4if">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <inputData id="InputData_0yshxip" name="Existing Policy Cover" />
+  <inputData id="InputData_1hge8xj" name="Existing Claims" />
+  <inputData id="InputData_0ajz9xm" name="Age" />
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="subscriptionDecision">
+        <dc:Bounds height="80" width="180" x="410" y="120" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="DMNShape_1vlvekm" dmnElementRef="Decision_1xoblgv">
+        <dc:Bounds height="80" width="180" x="230" y="290" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="DMNShape_1njmo1j" dmnElementRef="InputData_0yshxip">
+        <dc:Bounds height="45" width="125" x="157" y="478" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="DMNShape_1r9v2yb" dmnElementRef="InputData_1hge8xj">
+        <dc:Bounds height="45" width="125" x="347" y="479" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="DMNShape_1j9l94j" dmnElementRef="InputData_0ajz9xm">
+        <dc:Bounds height="45" width="125" x="558" y="308" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_0o6cphz" dmnElementRef="InformationRequirement_0lynayl">
+        <di:waypoint x="621" y="308" />
+        <di:waypoint x="530" y="220" />
+        <di:waypoint x="530" y="200" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNEdge id="DMNEdge_12b63ek" dmnElementRef="InformationRequirement_14i51qu">
+        <di:waypoint x="220" y="478" />
+        <di:waypoint x="290" y="390" />
+        <di:waypoint x="290" y="370" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNEdge id="DMNEdge_1i49fqj" dmnElementRef="InformationRequirement_16nm1zn">
+        <di:waypoint x="410" y="479" />
+        <di:waypoint x="350" y="390" />
+        <di:waypoint x="350" y="370" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNEdge id="DMNEdge_0qt40k8" dmnElementRef="InformationRequirement_1niwzjb">
+        <di:waypoint x="320" y="290" />
+        <di:waypoint x="470" y="220" />
+        <di:waypoint x="470" y="200" />
+      </dmndi:DMNEdge>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
